@@ -8,14 +8,13 @@ import Math
 main :: IO ()
 main = hspec spec
 
-instance Arbitrary Vector where -- => Arbitrary (Double) where
+instance Arbitrary Vector where
     arbitrary = do 
         x <- arbitrary
         y <- arbitrary
         z <- arbitrary
         w <- arbitrary
         return (Vector x y z w) 
-        
 
 prop_Operations :: Vector -> Vector -> Bool
 prop_Operations u v = u + v == v - (-u)
