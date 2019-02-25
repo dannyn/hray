@@ -1,9 +1,9 @@
-module Math.MathSpec (main, spec) where
+module Math.VectorSpec (main, spec) where
 
 import Test.Hspec
 import Test.QuickCheck
 
-import Math
+import Math.Vector 
 
 main :: IO ()
 main = hspec spec

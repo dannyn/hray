@@ -1,4 +1,12 @@
-module Math (Vector(..), point, vec, norm, dot, cross, mulScalar )  where
+module Math.Vector 
+( Vector(..)
+, point
+, vec
+, norm
+, dot
+, cross
+, mulScalar 
+) where
 
 -- For comparing Vectors. 
 epsilon = 0.00000001
