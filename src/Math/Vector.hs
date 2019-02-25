@@ -3,6 +3,7 @@ module Math.Vector
 , point
 , vec
 , norm
+, normalize
 , dot
 , cross
 , mulScalar 
@@ -41,7 +42,8 @@ norm :: Vector -> Double
 norm (Vector x y z _) = sqrt (x^2 + y^2 + z^2)
 
 normalize :: Vector -> Vector
-normalize (Vector x y z w) =  (Vector x y z w)
+normalize (Vector x y z w) = (Vector (x / n) (y / n) (z / n) (w / n))
+    where n = norm (Vector x y z w)
 
 dot :: Vector -> Vector -> Double
 dot (Vector a b c d) (Vector x y z w) = (a * x) + (b * y) + (c * z) + (d * w)

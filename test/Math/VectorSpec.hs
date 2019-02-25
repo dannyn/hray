@@ -21,7 +21,10 @@ prop_Operations u v = u + v == v - (-u)
 
 prop_Distributivity :: Vector -> Vector -> Double -> Bool
 prop_Distributivity u v r = mulScalar (u+v) r == (mulScalar u r) + (mulScalar v r)
- 
+
+prop_Normalization :: Vector -> Bool
+prop_Normalization v = norm v == 1.0
+
 spec :: Spec
 spec = do
   describe "math" $ do
@@ -41,6 +44,9 @@ spec = do
         it "norm" $ do 
             let u = (vec 1.0 2.0 3.0)
             (norm u) `shouldBe` (sqrt 14.0)
+        it "normalization" $ do
+            let u = (vec 4.0 0.0 0.0)
+            (normalize u) `shouldBe` (vec 1.0 0.0 0.0)
         it "dot" $ do
             let u = (vec 1.0 2.0 3.0)
             let v = (vec 2.0 3.0 4.0)
