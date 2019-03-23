@@ -41,9 +41,11 @@ mulScalar (Vector x y z w) r = Vector (x*r) (y*r) (z*r) (w*r)
 norm :: Vector -> Double
 norm (Vector x y z _) = sqrt (x^2 + y^2 + z^2)
 
-normalize :: Vector -> Vector
-normalize (Vector x y z w) = (Vector (x / n) (y / n) (z / n) (w / n))
-    where n = norm (Vector x y z w)
+normalize :: Vector -> Maybe Vector
+normalize (Vector x y z w)
+        | n > 0     = Just (Vector (x / n) (y / n) (z / n) (w / n))
+        | otherwise = Nothing
+        where n = norm (Vector x y z w)
 
 dot :: Vector -> Vector -> Double
 dot (Vector a b c d) (Vector x y z w) = (a * x) + (b * y) + (c * z) + (d * w)

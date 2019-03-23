@@ -46,7 +46,7 @@ spec = do
             (norm u) `shouldBe` (sqrt 14.0)
         it "normalization" $ do
             let u = (vec 4.0 0.0 0.0)
-            (normalize u) `shouldBe` (vec 1.0 0.0 0.0)
+            (normalize u) `shouldBe` Just (vec 1.0 0.0 0.0)
         it "dot" $ do
             let u = (vec 1.0 2.0 3.0)
             let v = (vec 2.0 3.0 4.0)
