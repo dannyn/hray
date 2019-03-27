@@ -3,6 +3,7 @@ module Math.VectorSpec (main, spec) where
 import Test.Hspec
 import Test.QuickCheck
 
+import Math
 import Math.Vector 
 
 main :: IO ()
@@ -23,7 +24,9 @@ prop_Distributivity :: Vector -> Vector -> Double -> Bool
 prop_Distributivity u v r = mulScalar (u+v) r == (mulScalar u r) + (mulScalar v r)
 
 prop_Normalization :: Vector -> Bool
-prop_Normalization v = norm v == 1.0
+prop_Normalization v = case (normalize v) of
+    Nothing -> norm v == 0.0
+    Just x  -> relEq (norm x) 1.0
 
 spec :: Spec
 spec = do
@@ -44,9 +47,6 @@ spec = do
         it "norm" $ do 
             let u = (vec 1.0 2.0 3.0)
             (norm u) `shouldBe` (sqrt 14.0)
-        it "normalization" $ do
-            let u = (vec 4.0 0.0 0.0)
-            (normalize u) `shouldBe` Just (vec 1.0 0.0 0.0)
         it "dot" $ do
             let u = (vec 1.0 2.0 3.0)
             let v = (vec 2.0 3.0 4.0)
@@ -57,3 +57,4 @@ spec = do
             (cross u v) `shouldBe` (vec (-1.0) 2.0 (-1.0))
         it "operations" $ property $ prop_Operations
         it "distributivity" $ property $ prop_Distributivity
+        it "normalization" $ property $ prop_Normalization

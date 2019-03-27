@@ -7,10 +7,10 @@ module Math.Vector
 , dot
 , cross
 , mulScalar 
+, relEq
 ) where
 
--- For comparing Vectors. 
-epsilon = 0.00000001
+import Math
 
 data Vector  = Vector { x :: Double
                       , y :: Double 
@@ -30,11 +30,6 @@ vec x y z = Vector x y z 0
 point :: Double -> Double -> Double -> Vector
 point x y z = Vector x y z 1
 
-relEq :: Double -> Double -> Bool
-relEq a b 
-    | (abs (a - b)) <= epsilon = True
-    | otherwise      = False
-
 mulScalar :: Vector -> Double -> Vector
 mulScalar (Vector x y z w) r = Vector (x*r) (y*r) (z*r) (w*r)
 
@@ -43,7 +38,7 @@ norm (Vector x y z _) = sqrt (x^2 + y^2 + z^2)
 
 normalize :: Vector -> Maybe Vector
 normalize (Vector x y z w)
-        | n > 0     = Just (Vector (x / n) (y / n) (z / n) (w / n))
+        | n > 0     = Just (Vector (x / n) (y / n) (z / n) w)
         | otherwise = Nothing
         where n = norm (Vector x y z w)
 
