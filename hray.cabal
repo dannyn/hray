@@ -37,6 +37,7 @@ test-suite hray-test
   main-is:             Spec.hs
   build-depends:       base
                      , hray
+                     , array
                      , hspec
                      , QuickCheck
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N

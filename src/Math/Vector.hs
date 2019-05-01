@@ -10,6 +10,7 @@ module Math.Vector
 , cross
 , mulScalar 
 , hadamard
+, colorToRGB
 ) where
 
 import Math
@@ -60,5 +61,9 @@ instance Eq Vector where
         | (relEq a x) && (relEq b y) && (relEq c z) && (relEq d w) = True
         | otherwise = False
 
-hadamard:: Color -> Color -> Color
+hadamard :: Color -> Color -> Color
 hadamard (Vector r1 g1 b1 _) (Vector r2 g2 b2 _) = Vector (r1*r2) (g1*g2) (b1*b2) 0.0
+
+colorToRGB :: Color -> String
+colorToRGB (Vector r g b _) = (rgb r) ++ " " ++ (rgb g) ++ " " ++ (rgb b)
+    where rgb = \d -> show . floor $ d * 255
