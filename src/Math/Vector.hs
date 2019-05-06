@@ -1,3 +1,5 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module Math.Vector 
 ( Vector(..)
 , Color(..)
@@ -11,14 +13,22 @@ module Math.Vector
 , mulScalar 
 , hadamard
 , colorToRGB
+, vX
+, vY
+, vZ
 ) where
+
+import Control.Lens
 
 import Math
 
-data Vector  = Vector { x :: Double
-                      , y :: Double 
-                      , z :: Double 
-                      , w :: Double } deriving (Show)
+
+data Vector  = Vector { _vX :: Double
+                      , _vY :: Double 
+                      , _vZ :: Double 
+                      , _vW :: Double } deriving (Show)
+
+makeLenses ''Vector
 
 type Color = Vector
 
