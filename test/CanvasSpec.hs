@@ -30,6 +30,12 @@ spec = do
     it "header" $ do
         let c = canvas 3 5
         canvasHeader c `shouldBe` "P3\n3 5\n255\n"
+    it "row to string"  $ do
+        let r = color 1.0 0.0 0.0
+        let g = color 0.0 1.0 0.0
+        let b = color 0.0 0.0 1.0
+        let row = array(0,2) [(0,r),(1,g),(2,b)]
+        rowToString row `shouldBe` "255 0 0 0 255 0 0 0 255"
     it "canvas to string" $ do 
         let c1 = setPixel 0 0 (canvas 2 2) (color 1.0 1.0 1.0)
         let c2 = setPixel 0 1 c1 (color 0.0 1.0 0.0)
