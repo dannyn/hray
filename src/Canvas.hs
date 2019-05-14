@@ -1,7 +1,6 @@
 module Canvas 
 ( Canvas(..)
 , canvas
-, canvasPrintRow
 , getPixel
 , setPixel
 , canvasWidth
@@ -11,7 +10,6 @@ module Canvas
 , canvasSaveToDisk
 , wrapTo70
 , getWrappedLines
-, rowToString
 ) where
 
 import System.IO
@@ -21,37 +19,34 @@ import Text.Printf
 import Math.Vector
 
 -- The pixels in a Canvas are indexed as (x,y)
-data Canvas = Canvas { pixels::Array Int (Array Int Color)} deriving (Show, Eq)
-
-canvasPrintRow :: Canvas -> Int -> IO ()
-canvasPrintRow (Canvas p) r = do
-    print (p ! r)
+data Canvas = Canvas { pixels :: Array Int Color
+                     , width :: Int 
+                     , height :: Int } deriving (Show, Eq)
 
 canvas :: Int -> Int -> Canvas
-canvas x y = Canvas  (array(0,x-1) [ (n, row ) | n <- [0..x-1]])
+canvas w h = Canvas (array(0, (w * h) -1) [ (n, black) | n <- [0..(w * h) -1]]) w h
     where black = color 0.0 0.0 0.0
-          row   = array(0,y-1) [ (n, black) | n <- [0..y-1]]
 
 getPixel :: Int -> Int -> Canvas -> Color
-getPixel x y (Canvas p) =  (p ! x) ! y
+getPixel x y (Canvas p w h) =  p ! ( (y * w) + x)
 
 setPixel :: Int -> Int -> Canvas -> Color -> Canvas
-setPixel x y (Canvas p) c = Canvas ( p // [(x, row // [(y, c)])])
-    where row = p ! x
+setPixel x y (Canvas p w h) c = Canvas ( p // [(i, c)] ) w h
+    where i = ( (y * w) + x)
 
 canvasWidth :: Canvas -> Int
-canvasWidth (Canvas p) = length $ indices p
+canvasWidth (Canvas _ w _ ) = w
 
 canvasHeight :: Canvas -> Int
-canvasHeight (Canvas p) = length $ p ! 0
+canvasHeight (Canvas _ _ h ) = h
 
 canvasHeader :: Canvas -> String
-canvasHeader c = printf "P3\n%d %d\n255\n" (canvasWidth c) (canvasHeight c)
+canvasHeader (Canvas _ w h) = printf "P3\n%d %d\n255\n" w h
 
 canvasToString :: Canvas -> String
-canvasToString (Canvas p) = getWrappedLines s
-    where f = \acc x -> acc ++ " " ++ (rowToString x)
-          s = tail $ foldl f "" (elems p)
+canvasToString (Canvas p _ _) = getWrappedLines s
+    where f = \acc x -> acc ++ " " ++ x
+          s = tail $ foldl f "" (map colorToRGB (elems p))
 
 getWrappedLines :: String -> String
 getWrappedLines s = (getWrappedLines' (words s) "")
@@ -71,10 +66,6 @@ wrapTo70' (x:xs) acc
         | otherwise = wrapTo70' xs newAcc
     where newAcc = acc ++ " " ++ x
           len = length newAcc
-
-rowToString :: (Array Int Color) -> String
-rowToString a = tail $ foldl f "" (map colorToRGB (elems a))
-    where f = \acc x -> acc ++ " " ++ x
 
 canvasSaveToDisk:: Canvas -> IO ()
 canvasSaveToDisk c = do
