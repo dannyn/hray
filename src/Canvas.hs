@@ -9,29 +9,31 @@ module Canvas
 , canvasToString
 , canvasSaveToDisk
 , wrapTo70
+, addSpaces
 , getWrappedLines
 ) where
 
 import System.IO
-import Data.Array
 import Text.Printf
+
+import qualified Data.Vector as V
 
 import Math.Vector
 
--- The pixels in a Canvas are indexed as (x,y)
-data Canvas = Canvas { pixels :: Array Int Color
+data Canvas = Canvas { pixels :: V.Vector Color
                      , width :: Int 
                      , height :: Int } deriving (Show, Eq)
 
 canvas :: Int -> Int -> Canvas
-canvas w h = Canvas (array(0, (w * h) -1) [ (n, black) | n <- [0..(w * h) -1]]) w h
-    where black = color 0.0 0.0 0.0
+canvas w h = Canvas pixels w h
+    where black  = color 0.0 0.0 0.0
+          pixels = V.fromList [black | n <- [1..w*h]] 
 
 getPixel :: Int -> Int -> Canvas -> Color
-getPixel x y (Canvas p w h) =  p ! ( (y * w) + x)
+getPixel x y (Canvas p w h) =  p V.! ( (y * w) + x)
 
 setPixel :: Int -> Int -> Canvas -> Color -> Canvas
-setPixel x y (Canvas p w h) c = Canvas ( p // [(i, c)] ) w h
+setPixel x y (Canvas p w h) c = Canvas ( p V.//  [(i,c)] )  w h
     where i = ( (y * w) + x)
 
 canvasWidth :: Canvas -> Int
@@ -43,29 +45,41 @@ canvasHeight (Canvas _ _ h ) = h
 canvasHeader :: Canvas -> String
 canvasHeader (Canvas _ w h) = printf "P3\n%d %d\n255\n" w h
 
+-- 
+--  Take each color as a string on its own, and operate on these instead of the individual components.
+-- 
 canvasToString :: Canvas -> String
 canvasToString (Canvas p _ _) = getWrappedLines s
-    where f = \acc x -> acc ++ " " ++ x
-          s = tail $ foldl f "" (map colorToRGB (elems p))
+    where f = \acc x -> acc ++ x
+          s = concat (V.map colorToRGB p)
 
-getWrappedLines :: String -> String
-getWrappedLines s = (getWrappedLines' (words s) "")
+getWrappedLines :: [String] -> String
+getWrappedLines s = concat . getWrappedLines' $ s 
 
-getWrappedLines' :: [String] -> String -> String
-getWrappedLines' [] s = s 
-getWrappedLines' xs s = getWrappedLines' nxs (s ++ ns ++ "\n")
+getWrappedLines' :: [String] -> [String]
+getWrappedLines' []  = []
+getWrappedLines' xs = ns : getWrappedLines' nxs
     where (ns, nxs) = wrapTo70 xs
 
+-- Takes a list of strings and returns a string made from the first
+-- several of length no more than 70 along with the remainder of 
+-- the list.
 wrapTo70 :: [String] -> (String, [String])
-wrapTo70 xs = wrapTo70' xs ""
+wrapTo70 xs = (concat . addSpaces $ ns, nxs)
+    where (ns, nxs) = wrapTo70' xs [] 1
 
-wrapTo70' :: [String] -> String -> (String, [String])
-wrapTo70' (x:xs) acc 
-        | len > 70  = (tail acc, [x] ++ xs)
-        | xs==[]    = (tail newAcc, [])
-        | otherwise = wrapTo70' xs newAcc
-    where newAcc = acc ++ " " ++ x
-          len = length newAcc
+-- Add a space between every string in the list, and add a newline at the end.
+addSpaces :: [String] -> [String]
+addSpaces [] = []
+addSpaces [x] = x : ["\n"]
+addSpaces (x:xs) = x : " " : addSpaces xs
+
+wrapTo70' :: [String] -> [String] -> Int -> ([String], [String])
+wrapTo70' (x:xs) acc l
+        | l >= (69 - length x)  = ([x], xs)
+        | otherwise = (x : ns, nxs)
+    where (ns, nxs) = wrapTo70' xs acc (l+1 + (length x)) 
+wrapTo70' [] acc l = ( [], [])
 
 canvasSaveToDisk:: Canvas -> IO ()
 canvasSaveToDisk c = do

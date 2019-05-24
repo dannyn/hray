@@ -3,7 +3,7 @@ module CanvasSpec (main, spec) where
 import Test.Hspec
 import Test.QuickCheck
 
-import Data.Array
+import qualified Data.Vector as V
 
 import Canvas
 import Math.Vector
@@ -15,7 +15,7 @@ spec :: Spec
 spec = do
   describe "canvas" $ do
     it "create" $ do
-        let a = array (0,3) [(i, (color 0.0 0.0 0.0)) | i <- [0..3]]
+        let a = V.fromList [color 0.0 0.0 0.0 | i <- [0..3]]
         (canvas 2 2) `shouldBe` Canvas a 2 2
     it "set and get" $ do 
         let c = setPixel 5 3 (canvas 6 4) (color 1.0 1.0 1.0)
@@ -36,13 +36,13 @@ spec = do
         canvasToString c3 `shouldBe` "255 255 255 0 0 0 0 255 0 255 0 0\n"
     it "wrapto70 wrap" $ do
         let s  = "1 2 3 4 1 a 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 x n m p" 
-        let s' = "1 2 3 4 1 a 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 x"
+        let s' = "1 2 3 4 1 a 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 x\n"
         let l = ["n", "m", "p"]
         wrapTo70 (words s) `shouldBe` (s', l)
     it "wrapto70 no wrap" $ do
-        let s  = "a 1 1 1 1 1 1 1 1 1 1 1 b 1 1 1 1 1 c 1 1 1 1 1 1 1 1 1 1 1 1 1 1 d" 
+        let s  = "a 1 1 1 1 1 1 1 1 1 1 1 b 1 1 1 1 1 c 1 1 1 1 1 1 1 1 1 1 1 1 1 1 d\n" 
         wrapTo70 (words s) `shouldBe` (s, [])
     it "get wrapped lines" $ do
-        let s  = "1 2 3 4 1 a 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 x n m p" 
+        let s  = words "1 2 3 4 1 a 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 x n m p" 
         let r  = "1 2 3 4 1 a 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 x\nn m p\n" 
         getWrappedLines s `shouldBe` r
