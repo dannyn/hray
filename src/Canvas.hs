@@ -1,4 +1,4 @@
-module Canvas 
+module Canvas
 ( Canvas(..)
 , canvas
 , getPixel
@@ -45,16 +45,19 @@ canvasHeight (Canvas _ _ h ) = h
 canvasHeader :: Canvas -> String
 canvasHeader (Canvas _ w h) = printf "P3\n%d %d\n255\n" w h
 
--- 
---  Take each color as a string on its own, and operate on these instead of the individual components.
--- 
 canvasToString :: Canvas -> String
 canvasToString (Canvas p _ _) = getWrappedLines s
     where f = \acc x -> acc ++ x
           s = concat (V.map colorToRGB p)
 
+canvasSaveToDisk:: Canvas -> IO ()
+canvasSaveToDisk c = do
+    writeFile "test.ppm" $ (canvasHeader c) ++ (canvasToString c)
+    return ()
+
+
 getWrappedLines :: [String] -> String
-getWrappedLines s = concat . getWrappedLines' $ s 
+getWrappedLines s = concat  (getWrappedLines' s )
 
 getWrappedLines' :: [String] -> [String]
 getWrappedLines' []  = []
@@ -80,8 +83,3 @@ wrapTo70' (x:xs) acc l
         | otherwise = (x : ns, nxs)
     where (ns, nxs) = wrapTo70' xs acc (l+1 + (length x)) 
 wrapTo70' [] acc l = ( [], [])
-
-canvasSaveToDisk:: Canvas -> IO ()
-canvasSaveToDisk c = do
-    writeFile "test.ppm" $ (canvasHeader c) ++ (canvasToString c)
-    return ()

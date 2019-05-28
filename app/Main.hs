@@ -23,7 +23,7 @@ data Environment = Environment { _eCanvas :: Canvas
 makeLenses ''Environment
 
 environment :: Vector -> Vector -> Environment
-environment grav wind = Environment (canvas 500 500) p grav wind
+environment grav wind = Environment (canvas 100 100) p grav wind
     where p = Projectile (point 0.0 1.0 0.0) (vec 1.15 1.0 0.0)
 
 tickProjectile :: Projectile -> Vector -> Vector -> Projectile
