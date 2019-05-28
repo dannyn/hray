@@ -55,6 +55,10 @@ spec = do
             let u = (vec 1.0 2.0 3.0)
             let v = (vec 2.0 3.0 4.0)
             (cross u v) `shouldBe` (vec (-1.0) 2.0 (-1.0))
+        it "hadamard product" $ do 
+            let c1 = color 1.0 0.2 0.4
+            let c2 = color 0.9 1.0 0.1
+            (hadamard c1 c2) `shouldBe` (color 0.9 0.2 0.04)
         it "operations" $ property $ prop_Operations
         it "distributivity" $ property $ prop_Distributivity
         it "normalization" $ property $ prop_Normalization

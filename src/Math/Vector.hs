@@ -1,5 +1,9 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module Math.Vector 
 ( Vector(..)
+, Color(..)
+, color
 , point
 , vec
 , norm
@@ -7,15 +11,26 @@ module Math.Vector
 , dot
 , cross
 , mulScalar 
-, relEq
+, hadamard
+, colorToRGB
+, vX
+, vY
+, vZ
 ) where
+
+import Control.Lens
 
 import Math
 
-data Vector  = Vector { x :: Double
-                      , y :: Double 
-                      , z :: Double 
-                      , w :: Double } deriving (Show)
+
+data Vector  = Vector { _vX :: Double
+                      , _vY :: Double 
+                      , _vZ :: Double 
+                      , _vW :: Double } deriving (Show)
+
+makeLenses ''Vector
+
+type Color = Vector
 
 instance Num Vector where
     (Vector a b c d) + (Vector x y z w) = Vector (a+x) (b+y) (c+z) (d+w)
@@ -23,6 +38,9 @@ instance Num Vector where
     negate (Vector x y z w) = Vector (-x) (-y) (-z) (-w)
     abs (Vector x y z w) = 1
     fromInteger n = Vector (fromIntegral n) (fromIntegral n) (fromIntegral n) (fromIntegral n) 
+
+color :: Double -> Double -> Double -> Color
+color r g b = vec r g b
 
 vec :: Double -> Double -> Double -> Vector
 vec x y z = Vector x y z 0
@@ -52,3 +70,12 @@ instance Eq Vector where
     (Vector a b c d) == (Vector x y z w) 
         | (relEq a x) && (relEq b y) && (relEq c z) && (relEq d w) = True
         | otherwise = False
+
+hadamard :: Color -> Color -> Color
+hadamard (Vector r1 g1 b1 _) (Vector r2 g2 b2 _) = Vector (r1*r2) (g1*g2) (b1*b2) 0.0
+
+colorToRGB :: Color -> [String]
+colorToRGB (Vector r g b _) = [(rgb r), (rgb g), (rgb b)]
+--colorToRGB :: Color -> String
+--colorToRGB (Vector r g b _) = (rgb r) ++ " " ++ (rgb g) ++ " " ++ (rgb b)
+    where rgb = \d -> show . floor $ d * 255
