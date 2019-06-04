@@ -3,9 +3,9 @@
 module Math.Matrix
 ( Matrix(..)
 , identity
-, matrixFromList
+, fromList
 , getEntry
-, matrixByScaler 
+, byScaler 
 ) where
 
 import Math
@@ -21,17 +21,17 @@ identity = Matrix $ V.fromList [ 1.0, 0.0, 0.0, 0.0
                                , 0.0, 0.0, 1.0, 0.0
                                , 0.0, 0.0, 0.0, 1.0 ]
 
-matrixFromList :: [Double] -> Matrix
-matrixFromList l = Matrix $ V.fromList l
+fromList :: [Double] -> Matrix
+fromList l = Matrix $ V.fromList l
 
 translation :: Vector -> Matrix
-translation (Vector x y z _) = matrixFromList [ 1.0, 0.0, 0.0, x
+translation (Vector x y z _) = fromList [ 1.0, 0.0, 0.0, x
                                               , 0.0, 1.0, 0.0, y
                                               , 0.0, 0.0, 1.0, z
                                               , 0.0, 0.0, 0.0, 1.0 ]
 
 scaling :: Vector -> Matrix
-scaling (Vector x y z _) = matrixFromList [   x, 0.0, 0.0, 0.0
+scaling (Vector x y z _) = fromList [   x, 0.0, 0.0, 0.0
                                           , 0.0,   y, 0.0, 0.0
                                           , 0.0, 0.0,   z, 0.0
                                           , 0.0, 0.0, 0.0, 1.0 ]
@@ -61,7 +61,7 @@ matrixMulEntry m1 m2 x y = (a0 * b0) + (a1 * b1) + (a2 * b2) + (a3 * b3)
 
 instance Num Matrix where
     (Matrix a) + (Matrix b) = identity
-    a * b = matrixFromList [ matrixMulEntry a b 0 0
+    a * b = fromList [ matrixMulEntry a b 0 0
                            , matrixMulEntry a b 1 0 
                            , matrixMulEntry a b 2 0 
                            , matrixMulEntry a b 3 0 
@@ -81,6 +81,6 @@ instance Num Matrix where
 --    abs (Vector x y z w) = 1
 --    fromInteger n = Vector (fromIntegral n) (fromIntegral n) (fromIntegral n) (fromIntegral n) 
 
-matrixByScaler :: Matrix -> Double -> Matrix
-matrixByScaler (Matrix m) d = Matrix (V.map (* d) m)
+byScaler :: Matrix -> Double -> Matrix
+byScaler (Matrix m) d = Matrix (V.map (* d) m)
 
