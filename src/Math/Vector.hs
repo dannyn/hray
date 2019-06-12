@@ -76,6 +76,4 @@ hadamard (Vector r1 g1 b1 _) (Vector r2 g2 b2 _) = Vector (r1*r2) (g1*g2) (b1*b2
 
 colorToRGB :: Color -> [String]
 colorToRGB (Vector r g b _) = [(rgb r), (rgb g), (rgb b)]
---colorToRGB :: Color -> String
---colorToRGB (Vector r g b _) = (rgb r) ++ " " ++ (rgb g) ++ " " ++ (rgb b)
     where rgb = \d -> show . floor $ d * 255
