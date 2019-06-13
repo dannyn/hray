@@ -6,7 +6,6 @@ import Test.QuickCheck
 import qualified Data.Vector as V
 
 import Canvas
-import Math.Vector
 
 main :: IO ()
 main = hspec spec

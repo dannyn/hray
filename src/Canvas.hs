@@ -18,21 +18,21 @@ import Text.Printf
 
 import qualified Data.Vector as V
 
-import Math.Vector
+import Colour
 
-data Canvas = Canvas { pixels :: V.Vector Color
+data Canvas = Canvas { pixels :: V.Vector Colour
                      , width :: Int 
                      , height :: Int } deriving (Show, Eq)
 
 canvas :: Int -> Int -> Canvas
 canvas w h = Canvas pixels w h
-    where black  = color 0.0 0.0 0.0
+    where black  = colour 0.0 0.0 0.0
           pixels = V.fromList [black | n <- [1..w*h]] 
 
-getPixel :: Int -> Int -> Canvas -> Color
+getPixel :: Int -> Int -> Canvas -> Colour
 getPixel x y (Canvas p w h) =  p V.! ( (y * w) + x)
 
-setPixel :: Int -> Int -> Canvas -> Color -> Canvas
+setPixel :: Int -> Int -> Canvas -> Colour -> Canvas
 setPixel x y (Canvas p w h) c = Canvas ( p V.//  [(i,c)] )  w h
     where i = ( (y * w) + x)
 
@@ -48,13 +48,12 @@ canvasHeader (Canvas _ w h) = printf "P3\n%d %d\n255\n" w h
 canvasToString :: Canvas -> String
 canvasToString (Canvas p _ _) = getWrappedLines s
     where f = \acc x -> acc ++ x
-          s = concat (V.map colorToRGB p)
+          s = concat (V.map colourToRGB p)
 
 canvasSaveToDisk:: Canvas -> IO ()
 canvasSaveToDisk c = do
     writeFile "test.ppm" $ (canvasHeader c) ++ (canvasToString c)
     return ()
-
 
 getWrappedLines :: [String] -> String
 getWrappedLines s = concat  (getWrappedLines' s )
