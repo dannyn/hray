@@ -18,6 +18,7 @@ library
   exposed-modules:     Canvas 
                      , Colour
                      , Math
+                     , Ray
   build-depends:       base >= 4.7 && < 5
                      , containers
                      , vector
@@ -50,6 +51,7 @@ test-suite hray-test
   other-modules:       CanvasSpec  
                      , ColourSpec
                      , MathSpec
+                     , RaySpec
   default-language:    Haskell2010
 
 source-repository head

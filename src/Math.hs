@@ -2,6 +2,7 @@ module Math
 ( V3(..)
 , M44(..)
 , vec
+, pnt
 , vecCmp
 , idVec
 , transMat
@@ -15,7 +16,10 @@ module Math
 import Linear
 
 vec :: Double -> Double -> Double -> V4 Double
-vec x y z = V4 x y z 1.0
+vec x y z = V4 x y z 0.0
+
+pnt :: Double -> Double -> Double -> V4 Double
+pnt x y z = V4 x y z 1.0
 
 vecCmp :: V4 Double -> V4 Double -> Bool
 vecCmp u v= nearZero (u - v) 
