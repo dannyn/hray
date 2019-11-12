@@ -1,28 +1,46 @@
 module Ray
 ( 
-    Ray(..)
-,   Sphere(..)
-,   pos
-,   intersects'
+  Ray(..)
+, Intersection(..)
+, Sphere(..)
+, transformRay
+, hit
+, sortIntersections
+, sphere
+, pos
+, intersects
 ) where
+
+import Data.List
 
 import Linear
 import Math
 
-data Ray = Ray (V4 Double) (V4 Double)
+data Ray = Ray (V4 Double) (V4 Double) deriving (Show, Eq)
 
-data Intersection = Intersection Double Int
+data Intersection = Intersection Double Int deriving (Show, Eq)
 
-class Intersectable a where
-    intersects :: a -> Ray -> [Intersection]
+data Sphere = Sphere Int (M44 Double)
 
-data Sphere = Sphere Int
+instance Ord Intersection where
+    (Intersection t1 _) `compare` (Intersection t2 _) = t1 `compare` t2
 
---instance Intersectable Sphere where
---    intersects = intersects' 
+transformRay :: Ray -> M44 Double -> Ray
+transformRay (Ray o d) m = Ray (m !* o) ( m !* d) 
 
-intersects' :: Sphere -> Ray -> [Double]
-intersects' s r =
+-- This assumes your list of intersections is already sorted.
+hit :: [Intersection] -> Maybe Intersection
+hit (x@(Intersection t _):xs) = if t >= 0.0 then (Just x) else hit xs
+hit [] = Nothing
+
+sortIntersections :: [Intersection] -> [Intersection]
+sortIntersections xs = sort xs
+
+sphere :: Sphere
+sphere = Sphere 1 (identity :: M44 Double)
+
+intersects :: Sphere -> Ray -> [Double]
+intersects s r =
     if d < 0
         then 
             []
