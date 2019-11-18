@@ -51,3 +51,13 @@ spec = do
         let i2 = Intersection (-1) 0
         let xs = sortIntersections [i1, i2]
         (hit xs) `shouldBe` Nothing
+    it "scaled intersection" $ do
+        let r = Ray (pnt 0 0 (-5)) (vec 0 0 1)
+        let m = scaleMat (pnt 2 2 2)
+        let s = Sphere 1 m
+        (intersects s r) `shouldBe` [3, 7]
+    it "scaled intersection" $ do
+        let r = Ray (pnt 0 0 (-5)) (vec 0 0 1)
+        let m = transMat (pnt 5 0 0)
+        let s = Sphere 1 m
+        (intersects s r) `shouldBe` []

@@ -43,15 +43,16 @@ sphere :: Sphere
 sphere = Sphere 1 (identity :: M44 Double)
 
 intersects :: Sphere -> Ray -> [Double]
-intersects s r =
+intersects s@(Sphere _ m) r =
     if d < 0
         then 
             []
         else 
             [t1, t2]
-    where d = discriminant r
-          a = a' r
-          b = b' r 
+    where tR = transformRay r (inv44 m)
+          d = discriminant tR
+          a = a' tR
+          b = b' tR
           t1 = (-b - (sqrt d)) / (2 * a)
           t2 = (-b + (sqrt d)) / (2 * a)
 
