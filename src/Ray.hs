@@ -16,7 +16,7 @@ import Data.List
 import Linear
 import Math
 
-data Ray = Ray (V4 Double) (V4 Double) deriving (Show, Eq)
+data Ray = Ray (V4 Double) (V4 Double) deriving (Show)
 
 data Intersection = Intersection Double Int deriving (Show, Eq)
 
@@ -24,6 +24,9 @@ data Sphere = Sphere Int (M44 Double)
 
 instance Ord Intersection where
     (Intersection t1 _) `compare` (Intersection t2 _) = t1 `compare` t2
+
+instance Eq Ray where
+    (==) (Ray o1 d1) (Ray o2 d2) = (vecCmp o1 o2) && (vecCmp d1 d2)
 
 transformRay :: Ray -> M44 Double -> Ray
 transformRay (Ray o d) m = Ray (m !* o) ( m !* d) 
