@@ -5,7 +5,7 @@ module Colour
 , colourToRGB
 ) where
 
-import Linear
+import           Linear
 
 type Colour = V3 Double
 

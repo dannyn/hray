@@ -2,9 +2,9 @@
 
 module Main where
 
-import Canvas
-import Colour
-import Linear
+import           Canvas
+import           Colour
+import           Linear
 
 red = colour 1.0 0.0 0.0
 green = colour 0.0 1.0 0.0
@@ -20,5 +20,5 @@ run :: Canvas Colour
 run = canvas 100 100
 
 main :: IO ()
-main =  do 
+main =  do
     canvasSaveToDisk (run)

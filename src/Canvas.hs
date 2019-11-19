@@ -13,18 +13,18 @@ module Canvas
 , getWrappedLines
 ) where
 
-import System.IO
-import Text.Printf
+import           System.IO
+import           Text.Printf
 
 import qualified Data.Vector as V
 
-import Colour
+import           Colour
 
-data Canvas a = Canvas  { pixels :: V.Vector a 
-                     , width :: Int 
-                     , height :: Int } deriving (Show, Eq)
+data Canvas a = Canvas  { pixels :: V.Vector a
+                     , width     :: Int
+                     , height    :: Int } deriving (Show, Eq)
 
-instance Functor Canvas where  
+instance Functor Canvas where
     fmap f (Canvas p w h) = Canvas (fmap f p) w h
 
 --trace :: Objects -> Lights -> Camera -> Canvas (x,y) -> Canvas Colour
@@ -41,7 +41,7 @@ canvasHeader (Canvas _ w h) = printf "P3\n%d %d\n255\n" w h
 canvas :: Int -> Int -> Canvas Colour
 canvas w h = Canvas pixels w h
     where black  = colour 0.0 0.0 0.0
-          pixels = V.fromList [black | n <- [1..w*h]] 
+          pixels = V.fromList [black | n <- [1..w*h]]
 
 getPixel :: Int -> Int -> Canvas Colour -> Colour
 getPixel x y (Canvas p w h) =  p V.! ( (y * w) + x)
@@ -69,7 +69,7 @@ getWrappedLines' xs = ns : getWrappedLines' nxs
     where (ns, nxs) = wrapTo70 xs
 
 -- Takes a list of strings and returns a string made from the first
--- several of length no more than 70 along with the remainder of 
+-- several of length no more than 70 along with the remainder of
 -- the list.
 wrapTo70 :: [String] -> (String, [String])
 wrapTo70 xs = (concat . addSpaces $ ns, nxs)
@@ -77,13 +77,13 @@ wrapTo70 xs = (concat . addSpaces $ ns, nxs)
 
 -- Add a space between every string in the list, and add a newline at the end.
 addSpaces :: [String] -> [String]
-addSpaces [] = []
-addSpaces [x] = x : ["\n"]
+addSpaces []     = []
+addSpaces [x]    = x : ["\n"]
 addSpaces (x:xs) = x : " " : addSpaces xs
 
 wrapTo70' :: [String] -> [String] -> Int -> ([String], [String])
 wrapTo70' (x:xs) acc l
         | l >= (69 - length x)  = ([x], xs)
         | otherwise = (x : ns, nxs)
-    where (ns, nxs) = wrapTo70' xs acc (l+1 + (length x)) 
+    where (ns, nxs) = wrapTo70' xs acc (l+1 + (length x))
 wrapTo70' [] acc l = ( [], [])

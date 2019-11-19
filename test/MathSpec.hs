@@ -1,11 +1,11 @@
 module MathSpec (main, spec) where
 
-import Test.Hspec
-import Test.QuickCheck
+import           Test.Hspec
+import           Test.QuickCheck
 
-import Linear
+import           Linear
 
-import Math
+import           Math
 
 main :: IO ()
 main = hspec spec
@@ -16,7 +16,7 @@ spec = do
     it "translation" $ do
         let v = pnt (-3.0) 4.0 5.0
         let m = transMat $ pnt 5 (-3) 2
-        m !* v `shouldBe` (pnt 2.0 1.0 7.0) 
+        m !* v `shouldBe` (pnt 2.0 1.0 7.0)
     it "inverse translation" $ do
         let v = pnt  2 1 7
         let m = inv44 . transMat $ pnt 5 (-3) 2

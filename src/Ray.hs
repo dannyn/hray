@@ -1,5 +1,5 @@
 module Ray
-( 
+(
   Ray(..)
 , Intersection(..)
 , Sphere(..)
@@ -11,15 +11,15 @@ module Ray
 , intersects
 ) where
 
-import Data.List
+import           Data.List
 
-import Linear
-import Math
+import           Linear
+import           Math
 
-data Ray = Ray { origin :: (V4 Double) 
+data Ray = Ray { origin    :: (V4 Double)
                , direction ::(V4 Double) } deriving (Show)
 
-data Intersection = Intersection { time :: Double 
+data Intersection = Intersection { time   :: Double
                                  , object :: Int } deriving (Show, Eq)
 
 data Sphere = Sphere Int (M44 Double)
@@ -31,12 +31,12 @@ instance Eq Ray where
     (==) (Ray o1 d1) (Ray o2 d2) = (vecCmp o1 o2) && (vecCmp d1 d2)
 
 transformRay :: Ray -> M44 Double -> Ray
-transformRay (Ray o d) m = Ray (m !* o) ( m !* d) 
+transformRay (Ray o d) m = Ray (m !* o) ( m !* d)
 
 -- This assumes your list of intersections is already sorted.
 hit :: [Intersection] -> Maybe Intersection
 hit (x@(Intersection t _):xs) = if t >= 0.0 then (Just x) else hit xs
-hit [] = Nothing
+hit []                        = Nothing
 
 sortIntersections :: [Intersection] -> [Intersection]
 sortIntersections = sort
@@ -47,9 +47,9 @@ sphere = Sphere 1 (identity :: M44 Double)
 intersects :: Sphere -> Ray -> [Double]
 intersects s@(Sphere _ m) r =
     if d < 0
-        then 
+        then
             []
-        else 
+        else
             [t1, t2]
     where tR = transformRay r (inv44 m)
           d = discriminant tR

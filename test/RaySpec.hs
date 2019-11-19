@@ -1,10 +1,10 @@
 module RaySpec (main, spec) where
 
-import Test.Hspec
-import Test.QuickCheck
+import           Test.Hspec
+import           Test.QuickCheck
 
-import Math
-import Ray
+import           Math
+import           Ray
 
 main :: IO ()
 main = hspec spec
@@ -17,7 +17,7 @@ spec = do
         (pos r (-1)) `shouldBe` (pnt 1 3 4)
     it "translate" $ do
         let r = Ray (pnt 1 2 3) (vec 0 1 0)
-        let m = transMat (pnt 3 4 5)  
+        let m = transMat (pnt 3 4 5)
         (transformRay r m) `shouldBe` (Ray (pnt 4 6 8) (vec 0 1 0))
     it "scale" $ do
         let r = Ray (pnt 1 2 3) (vec 0 1 0)
@@ -36,7 +36,7 @@ spec = do
     it "behind" $ do
         let r = Ray (pnt 0 0 5) (vec 0 0 1)
         (intersects sphere r) `shouldBe` [-6.0, -4.0]
-    it "hit, all positive" $ do 
+    it "hit, all positive" $ do
         let i1 = Intersection 1 0
         let i2 = Intersection 2 0
         let xs = sortIntersections [i1, i2]
