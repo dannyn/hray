@@ -32,10 +32,10 @@ spec = do
         (intersects sphere r) `shouldBe` []
     it "starts inside" $ do
         let r = Ray (pnt 0 0 0) (vec 0 0 1)
-        (intersects sphere  r) `shouldBe` [(-1.0), 1.0]
+        (intersects sphere  r) `shouldBe` [-1.0, 1.0]
     it "behind" $ do
         let r = Ray (pnt 0 0 5) (vec 0 0 1)
-        (intersects sphere r) `shouldBe` [(-6.0), (-4.0)]
+        (intersects sphere r) `shouldBe` [-6.0, -4.0]
     it "hit, all positive" $ do 
         let i1 = Intersection 1 0
         let i2 = Intersection 2 0

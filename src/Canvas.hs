@@ -1,11 +1,11 @@
 module Canvas
 ( Canvas(..)
-, canvas
-, getPixel
-, setPixel
 , canvasWidth
 , canvasHeight
 , canvasHeader
+, canvas
+, getPixel
+, setPixel
 , canvasToString
 , canvasSaveToDisk
 , wrapTo70
@@ -20,37 +20,42 @@ import qualified Data.Vector as V
 
 import Colour
 
-data Canvas = Canvas { pixels :: V.Vector Colour
+data Canvas a = Canvas  { pixels :: V.Vector a 
                      , width :: Int 
                      , height :: Int } deriving (Show, Eq)
 
-canvas :: Int -> Int -> Canvas
+instance Functor Canvas where  
+    fmap f (Canvas p w h) = Canvas (fmap f p) w h
+
+--trace :: Objects -> Lights -> Camera -> Canvas (x,y) -> Canvas Colour
+
+canvasWidth :: Canvas a -> Int
+canvasWidth (Canvas _ w _ ) = w
+
+canvasHeight :: Canvas a -> Int
+canvasHeight (Canvas _ _ h ) = h
+
+canvasHeader :: Canvas a -> String
+canvasHeader (Canvas _ w h) = printf "P3\n%d %d\n255\n" w h
+
+canvas :: Int -> Int -> Canvas Colour
 canvas w h = Canvas pixels w h
     where black  = colour 0.0 0.0 0.0
           pixels = V.fromList [black | n <- [1..w*h]] 
 
-getPixel :: Int -> Int -> Canvas -> Colour
+getPixel :: Int -> Int -> Canvas Colour -> Colour
 getPixel x y (Canvas p w h) =  p V.! ( (y * w) + x)
 
-setPixel :: Int -> Int -> Canvas -> Colour -> Canvas
+setPixel :: Int -> Int -> Canvas Colour -> Colour -> Canvas Colour
 setPixel x y (Canvas p w h) c = Canvas ( p V.//  [(i,c)] )  w h
     where i = ( (y * w) + x)
 
-canvasWidth :: Canvas -> Int
-canvasWidth (Canvas _ w _ ) = w
-
-canvasHeight :: Canvas -> Int
-canvasHeight (Canvas _ _ h ) = h
-
-canvasHeader :: Canvas -> String
-canvasHeader (Canvas _ w h) = printf "P3\n%d %d\n255\n" w h
-
-canvasToString :: Canvas -> String
+canvasToString :: Canvas Colour -> String
 canvasToString (Canvas p _ _) = getWrappedLines s
     where f = \acc x -> acc ++ x
           s = concat (V.map colourToRGB p)
 
-canvasSaveToDisk:: Canvas -> IO ()
+canvasSaveToDisk:: Canvas Colour -> IO ()
 canvasSaveToDisk c = do
     writeFile "test.ppm" $ (canvasHeader c) ++ (canvasToString c)
     return ()

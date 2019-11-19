@@ -16,10 +16,10 @@ spec = do
   describe "canvas" $ do
     it "create" $ do
         let a = V.fromList [colour 0.0 0.0 0.0 | i <- [0..3]]
-        (canvas 2 2) `shouldBe` Canvas a 2 2
+        canvas 2 2 `shouldBe` Canvas a 2 2
     it "set and get" $ do 
         let c = setPixel 5 3 (canvas 6 4) (colour 1.0 1.0 1.0)
-        (colour 1.0 1.0 1.0) `shouldBe` getPixel 5 3 c
+        colour 1.0 1.0 1.0 `shouldBe` getPixel 5 3 c
     it "width" $ do 
         let c = canvas 5 3
         canvasWidth c `shouldBe` 5

@@ -16,9 +16,11 @@ import Data.List
 import Linear
 import Math
 
-data Ray = Ray (V4 Double) (V4 Double) deriving (Show)
+data Ray = Ray { origin :: (V4 Double) 
+               , direction ::(V4 Double) } deriving (Show)
 
-data Intersection = Intersection Double Int deriving (Show, Eq)
+data Intersection = Intersection { time :: Double 
+                                 , object :: Int } deriving (Show, Eq)
 
 data Sphere = Sphere Int (M44 Double)
 
@@ -37,7 +39,7 @@ hit (x@(Intersection t _):xs) = if t >= 0.0 then (Just x) else hit xs
 hit [] = Nothing
 
 sortIntersections :: [Intersection] -> [Intersection]
-sortIntersections xs = sort xs
+sortIntersections = sort
 
 sphere :: Sphere
 sphere = Sphere 1 (identity :: M44 Double)
