@@ -48,7 +48,7 @@ getPixel x y (Canvas p w h) =  p V.! ( (y * w) + x)
 
 setPixel :: Int -> Int -> Canvas Colour -> Colour -> Canvas Colour
 setPixel x y (Canvas p w h) c = Canvas ( p V.//  [(i,c)] )  w h
-    where i = ( (y * w) + x)
+    where i = (y * w) + x
 
 canvasToString :: Canvas Colour -> String
 canvasToString (Canvas p _ _) = getWrappedLines s
@@ -57,7 +57,7 @@ canvasToString (Canvas p _ _) = getWrappedLines s
 
 canvasSaveToDisk:: Canvas Colour -> IO ()
 canvasSaveToDisk c = do
-    writeFile "test.ppm" $ (canvasHeader c) ++ (canvasToString c)
+    writeFile "test.ppm" $ canvasHeader c ++ canvasToString c
     return ()
 
 getWrappedLines :: [String] -> String
@@ -85,5 +85,5 @@ wrapTo70' :: [String] -> [String] -> Int -> ([String], [String])
 wrapTo70' (x:xs) acc l
         | l >= (69 - length x)  = ([x], xs)
         | otherwise = (x : ns, nxs)
-    where (ns, nxs) = wrapTo70' xs acc (l+1 + (length x))
+    where (ns, nxs) = wrapTo70' xs acc (l + 1 + length x)
 wrapTo70' [] acc l = ( [], [])

@@ -16,15 +16,15 @@ spec = do
     it "translation" $ do
         let v = pnt (-3.0) 4.0 5.0
         let m = transMat $ pnt 5 (-3) 2
-        m !* v `shouldBe` (pnt 2.0 1.0 7.0)
+        m !* v `shouldBe` pnt 2.0 1.0 7.0
     it "inverse translation" $ do
         let v = pnt  2 1 7
         let m = inv44 . transMat $ pnt 5 (-3) 2
-        m !* v `shouldBe` (pnt (-3.0) 4.0 5.0)
+        m !* v `shouldBe` pnt (-3.0) 4.0 5.0
     it "scaling" $ do
         let v = pnt (-4) 6 8
         let m = scaleMat $ pnt 2 3 4
-        m !* v `shouldBe` (pnt (-8) 18 32)
+        m !* v `shouldBe` pnt (-8) 18 32
     it "rotation x-axis" $ do
         let v = pnt 0 1 0
         let m = rotXMat (pi/2)
