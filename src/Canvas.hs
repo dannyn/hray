@@ -52,7 +52,7 @@ setPixel x y (Canvas p w h) c = Canvas ( p V.//  [(i,c)] )  w h
 
 canvasToString :: Canvas Colour -> String
 canvasToString (Canvas p _ _) = getWrappedLines s
-    where f = \acc x -> acc ++ x
+    where f acc x = acc ++ x
           s = concat (V.map colourToRGB p)
 
 canvasSaveToDisk:: Canvas Colour -> IO ()

@@ -1,5 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
-
 module Main where
 
 import           Canvas
@@ -20,5 +18,4 @@ run :: Canvas Colour
 run = canvas 100 100
 
 main :: IO ()
-main =  do
-    canvasSaveToDisk run
+main = canvasSaveToDisk run
