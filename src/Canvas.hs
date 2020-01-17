@@ -3,6 +3,7 @@ module Canvas
 , canvasWidth
 , canvasHeight
 , canvasHeader
+, coordCanvas
 , canvas
 , getPixel
 , setPixel
@@ -21,13 +22,18 @@ import qualified Data.Vector as V
 import           Colour
 
 data Canvas a = Canvas  { pixels :: V.Vector a
-                     , width     :: Int
-                     , height    :: Int } deriving (Show, Eq)
+                        , width  :: Int
+                        , height :: Int } deriving (Show, Eq)
 
 instance Functor Canvas where
     fmap f (Canvas p w h) = Canvas (fmap f p) w h
 
---trace :: Objects -> Lights -> Camera -> Canvas (x,y) -> Canvas Colour
+--
+-- We transform a canvas of coordinates to a canvas of colours
+-- f :: Sphere -> Canvas (Int, Int) -> Canvas Colour 
+-- f is expected to be curried in order to pass it information about the world such 
+-- as lights and models.
+--
 
 canvasWidth :: Canvas a -> Int
 canvasWidth (Canvas _ w _ ) = w
@@ -37,6 +43,9 @@ canvasHeight (Canvas _ _ h ) = h
 
 canvasHeader :: Canvas a -> String
 canvasHeader (Canvas _ w h) = printf "P3\n%d %d\n255\n" w h
+
+coordCanvas :: Int -> Int -> Canvas (Int, Int)
+coordCanvas w h = Canvas (V.fromList [(x,y) | x <- [0..w-1], y <- [0..h-1]]) w h
 
 canvas :: Int -> Int -> Canvas Colour
 canvas w h = Canvas pixels w h

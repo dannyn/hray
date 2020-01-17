@@ -11,6 +11,13 @@ import           Colour
 main :: IO ()
 main = hspec spec
 
+black = colour 0 0 0 
+white = colour 255 255 255
+
+line :: (Int, Int) -> Colour
+line (x, y) | x == y = white
+            | otherwise = black
+
 spec :: Spec
 spec = do
   describe "canvas" $ do
@@ -47,3 +54,10 @@ spec = do
         let s  = words "1 2 3 4 1 a 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 x n m p"
         let r  = "1 2 3 4 1 a 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 x\nn m p\n"
         getWrappedLines s `shouldBe` r
+    it "test functor" $ do
+        let cc = coordCanvas 3 3
+        let c = canvas 3 3
+        let c1 = setPixel 0 0 c white
+        let c2 = setPixel 1 1 c1 white
+        let c3 = setPixel 2 2 c2 white
+        fmap line cc `shouldBe` c3
