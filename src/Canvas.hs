@@ -1,11 +1,12 @@
 module Canvas
 ( Canvas(..)
-, canvas
-, getPixel
-, setPixel
 , canvasWidth
 , canvasHeight
 , canvasHeader
+, coordCanvas
+, canvas
+, getPixel
+, setPixel
 , canvasToString
 , canvasSaveToDisk
 , wrapTo70
@@ -13,46 +14,59 @@ module Canvas
 , getWrappedLines
 ) where
 
-import System.IO
-import Text.Printf
+import           System.IO
+import           Text.Printf
 
 import qualified Data.Vector as V
 
-import Colour
+import           Colour
 
-data Canvas = Canvas { pixels :: V.Vector Colour
-                     , width :: Int 
-                     , height :: Int } deriving (Show, Eq)
+data Canvas a = Canvas  { pixels :: V.Vector a
+                        , width  :: Int
+                        , height :: Int } deriving (Show, Eq)
 
-canvas :: Int -> Int -> Canvas
-canvas w h = Canvas pixels w h
-    where black  = colour 0.0 0.0 0.0
-          pixels = V.fromList [black | n <- [1..w*h]] 
+instance Functor Canvas where
+    fmap f (Canvas p w h) = Canvas (fmap f p) w h
 
-getPixel :: Int -> Int -> Canvas -> Colour
-getPixel x y (Canvas p w h) =  p V.! ( (y * w) + x)
+--
+-- We transform a canvas of coordinates to a canvas of colours
+-- f :: Sphere -> Canvas (Int, Int) -> Canvas Colour 
+-- f is expected to be curried in order to pass it information about the world such 
+-- as lights and models.
+--
 
-setPixel :: Int -> Int -> Canvas -> Colour -> Canvas
-setPixel x y (Canvas p w h) c = Canvas ( p V.//  [(i,c)] )  w h
-    where i = ( (y * w) + x)
-
-canvasWidth :: Canvas -> Int
+canvasWidth :: Canvas a -> Int
 canvasWidth (Canvas _ w _ ) = w
 
-canvasHeight :: Canvas -> Int
+canvasHeight :: Canvas a -> Int
 canvasHeight (Canvas _ _ h ) = h
 
-canvasHeader :: Canvas -> String
+canvasHeader :: Canvas a -> String
 canvasHeader (Canvas _ w h) = printf "P3\n%d %d\n255\n" w h
 
-canvasToString :: Canvas -> String
+coordCanvas :: Int -> Int -> Canvas (Int, Int)
+coordCanvas w h = Canvas (V.fromList [(x,y) | x <- [0..w-1], y <- [0..h-1]]) w h
+
+canvas :: Int -> Int -> Canvas Colour
+canvas w h = Canvas pixels w h
+    where black  = colour 0.0 0.0 0.0
+          pixels = V.fromList [black | n <- [1..w*h]]
+
+getPixel :: Int -> Int -> Canvas Colour -> Colour
+getPixel x y (Canvas p w h) =  p V.! ( (y * w) + x)
+
+setPixel :: Int -> Int -> Canvas Colour -> Colour -> Canvas Colour
+setPixel x y (Canvas p w h) c = Canvas ( p V.//  [(i,c)] )  w h
+    where i = (y * w) + x
+
+canvasToString :: Canvas Colour -> String
 canvasToString (Canvas p _ _) = getWrappedLines s
-    where f = \acc x -> acc ++ x
+    where f acc x = acc ++ x
           s = concat (V.map colourToRGB p)
 
-canvasSaveToDisk:: Canvas -> IO ()
+canvasSaveToDisk:: Canvas Colour -> IO ()
 canvasSaveToDisk c = do
-    writeFile "test.ppm" $ (canvasHeader c) ++ (canvasToString c)
+    writeFile "test.ppm" $ canvasHeader c ++ canvasToString c
     return ()
 
 getWrappedLines :: [String] -> String
@@ -64,7 +78,7 @@ getWrappedLines' xs = ns : getWrappedLines' nxs
     where (ns, nxs) = wrapTo70 xs
 
 -- Takes a list of strings and returns a string made from the first
--- several of length no more than 70 along with the remainder of 
+-- several of length no more than 70 along with the remainder of
 -- the list.
 wrapTo70 :: [String] -> (String, [String])
 wrapTo70 xs = (concat . addSpaces $ ns, nxs)
@@ -72,13 +86,13 @@ wrapTo70 xs = (concat . addSpaces $ ns, nxs)
 
 -- Add a space between every string in the list, and add a newline at the end.
 addSpaces :: [String] -> [String]
-addSpaces [] = []
-addSpaces [x] = x : ["\n"]
+addSpaces []     = []
+addSpaces [x]    = x : ["\n"]
 addSpaces (x:xs) = x : " " : addSpaces xs
 
 wrapTo70' :: [String] -> [String] -> Int -> ([String], [String])
 wrapTo70' (x:xs) acc l
         | l >= (69 - length x)  = ([x], xs)
         | otherwise = (x : ns, nxs)
-    where (ns, nxs) = wrapTo70' xs acc (l+1 + (length x)) 
+    where (ns, nxs) = wrapTo70' xs acc (l + 1 + length x)
 wrapTo70' [] acc l = ( [], [])
