@@ -74,6 +74,4 @@ spec = do
         let m = transMat (pnt 0 1 0)
         let s = Sphere 1 m
         let n = normal' s (pnt 0 1.70711 (-0.70711))
-        n `shouldBe` vec 0 0.70711 (-0.70711)
-
-
+        vecCmp n (vec 0 0.7071068 (-0.7071068)) `shouldBe` True

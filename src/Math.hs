@@ -6,6 +6,7 @@ module Math
 , vecCmp
 , dblCmp
 , idVec
+, zeroW
 , transMat
 , rotMat
 , scaleMat
@@ -30,6 +31,9 @@ dblCmp x y = nearZero (x - y)
 
 idVec :: V4 Double
 idVec = vec 0 0 0
+
+zeroW :: V4 Double -> V4 Double
+zeroW (V4 x y z _) = V4 x y z 0.0
 
 -- Always pass a pnt
 transMat :: V4 Double -> M44 Double

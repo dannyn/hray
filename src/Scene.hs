@@ -125,6 +125,10 @@ b' (Ray o d) = 2 * dot d (sphereToRay' o)
 
 --- the pnt here is the origin of the sphere
 normal' :: Sphere -> V4 Double -> V4 Double
-normal' (Sphere _ m) p = invt !* n
-    where n = normalize $ p - pnt 0 0 0
-          invt = (Linear.transpose . inv44) m
+normal' (Sphere _ m) p = normalize n
+    where inv = inv44 m
+          object_point = inv !* p
+          object_normal = object_point - pnt 0 0 0
+          world_normal = Linear.transpose inv !* object_normal
+          n = zeroW world_normal 
+
