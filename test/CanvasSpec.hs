@@ -11,7 +11,7 @@ import           Colour
 main :: IO ()
 main = hspec spec
 
-black = colour 0 0 0 
+black = colour 0 0 0
 white = colour 255 255 255
 
 line :: (Int, Int) -> Colour

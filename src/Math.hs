@@ -4,6 +4,7 @@ module Math
 , vec
 , pnt
 , vecCmp
+, dblCmp
 , idVec
 , transMat
 , rotMat
@@ -23,6 +24,9 @@ pnt x y z = V4 x y z 1.0
 
 vecCmp :: V4 Double -> V4 Double -> Bool
 vecCmp u v= nearZero (u - v)
+
+dblCmp :: Double -> Double -> Bool
+dblCmp x y = nearZero (x - y)
 
 idVec :: V4 Double
 idVec = vec 0 0 0

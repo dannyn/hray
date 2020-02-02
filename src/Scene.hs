@@ -6,46 +6,67 @@ module Scene
 , traceScene
 , Sphere(..)
 , unitSphere
+, Intersection(..)
+, hit
+, sortIntersections
 , sphere
+, normal'
 ) where
 
 import           Data.List
 
+import           Colour
 import           Linear
 import           Math
-import           Colour
 import           Ray
 
-data Shape = Shape { getInts :: Ray -> [Intersection] } 
+data Shape = Shape { getInts :: Ray -> [Intersection] }
 
-sphere :: Shape
-sphere = Shape (getIntersections s)
-         where  s = unitSphere
-
-
-data Scene = Scene { shape :: Shape 
-                   , ray_origin :: V4 Double
+data Scene = Scene { shape         :: Shape
+                   , ray_origin    :: V4 Double
                    , canvas_pixels :: Int
-                   , wall_size :: Int
-                   , wall_z :: Double }
+                   , wall_size     :: Int
+                   , wall_z        :: Double }
 
-scene = Scene sphere (pnt 0 0 (-5)) 100 7 10
+-- an intersection shouldnt return the shape, it should return anything we need to know about the
+-- intersection to perform the next steps
+data Intersection = Intersection { time   :: Double
+                                 , normal :: V4 Double}
+
+instance Eq Intersection where
+    (==) (Intersection t1 _) (Intersection t2 _) = dblCmp t1 t2
+
+instance Ord Intersection where
+    (Intersection t1 _) `compare` (Intersection t2 _) = t1 `compare` t2
+
+instance Show Intersection where
+  show (Intersection t _) = show t
+
+sortIntersections :: [Intersection] -> [Intersection]
+sortIntersections = sort
+
+-- This assumes your list of intersections is already sorted.
+hit :: [Intersection] -> Maybe Intersection
+hit (x@(Intersection t _):xs) = if t >= 0.0 then Just x else hit xs
+hit []                        = Nothing
+
+scene = Scene (sphere unitSphere) (pnt 0 0 (-5)) 100 7 10
 
 pixelSize :: Scene -> Double
-pixelSize (Scene _ _ cp ws _) = (fromIntegral ws) / (fromIntegral cp)
+pixelSize (Scene _ _ cp ws _) = fromIntegral ws / fromIntegral cp
 
 half :: Scene -> Double
-half (Scene _ _ _ ws _) = (fromIntegral ws) / 2
+half (Scene _ _ _ ws _) = fromIntegral ws / 2
 
 worldX :: Scene -> Int -> Double
 worldX s x = h + px
-    where h = - (half s)
-          px = (pixelSize s) * (fromIntegral x)
+    where h = -(half s)
+          px = pixelSize s * fromIntegral x
 
 worldY :: Scene -> Int -> Double
 worldY s y =  h - py
     where h = half s
-          py = (pixelSize s) * (fromIntegral y)  
+          py = pixelSize s * fromIntegral y
 
 getRay :: Scene -> (Int, Int) -> Ray
 getRay s@(Scene _ ro _ _ wz) (x, y)= Ray ro (normalize $ pos - ro)
@@ -59,15 +80,20 @@ traceScene s@(Scene (Shape getInts) _ _ _ _ ) (x, y) = getColour $ hit xs
 
 getColour :: Maybe Intersection -> Colour
 getColour (Just (Intersection _ _)) = colour 1.0 0 0
-getColour Nothing = colour 0 0 0
+getColour Nothing                   = colour 0 0 0
 
 ------------------------------------------------------------------------------------
 data Sphere = Sphere Int (M44 Double)
+
 unitSphere :: Sphere
 unitSphere = Sphere 1 (identity :: M44 Double)
 
+sphere :: Sphere -> Shape
+sphere s = Shape (getIntersections s)
+
 getIntersections :: Sphere -> Ray -> [Intersection]
-getIntersections s r = sortIntersections [Intersection t 1 | t <- intersects s r]
+getIntersections s r = sortIntersections [Intersection t (pnt 0 0 0) | t <- intersects s r]
+    where shp = sphere s
 
 intersects :: Sphere -> Ray -> [Double]
 intersects s@(Sphere _ m) r =
@@ -96,3 +122,9 @@ a' (Ray _ d) = dot d d
 
 b' :: Ray -> Double
 b' (Ray o d) = 2 * dot d (sphereToRay' o)
+
+--- the pnt here is the origin of the sphere
+normal' :: Sphere -> V4 Double -> V4 Double
+normal' (Sphere _ m) p = invt !* n
+    where n = normalize $ p - pnt 0 0 0
+          invt = (Linear.transpose . inv44) m
