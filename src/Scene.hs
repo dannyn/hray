@@ -1,6 +1,7 @@
 module Scene
 (
   Scene(..)
+, Material(..)
 , scene
 , intersects
 , traceScene
@@ -22,6 +23,12 @@ import           Ray
 
 data Shape = Shape { getInts :: Ray -> [Intersection] }
 
+data Material = Material { c :: Colour
+                         , ambient :: Double
+                         , diffuse :: Double
+                         , specular :: Double
+                         , shininess ::Double }
+
 data Scene = Scene { shape         :: Shape
                    , ray_origin    :: V4 Double
                    , canvas_pixels :: Int
@@ -30,25 +37,33 @@ data Scene = Scene { shape         :: Shape
 
 -- an intersection shouldnt return the shape, it should return anything we need to know about the
 -- intersection to perform the next steps
-data Intersection = Intersection { time   :: Double
-                                 , normal :: V4 Double}
+-- 
+--  We want 
+--      the ray
+--      the normal
+--      time
+--      material
+data Intersection = Intersection { time :: Double
+                                 , ray :: Ray
+                                 , normal :: V4 Double -- this should be a function to get a normal at a point
+                                 , mat :: Material } 
 
 instance Eq Intersection where
-    (==) (Intersection t1 _) (Intersection t2 _) = dblCmp t1 t2
+    (==) (Intersection t1 _ _ _) (Intersection t2 _ _ _) = dblCmp t1 t2
 
 instance Ord Intersection where
-    (Intersection t1 _) `compare` (Intersection t2 _) = t1 `compare` t2
+    (Intersection t1 _ _ _) `compare` (Intersection t2 _ _ _) = t1 `compare` t2
 
 instance Show Intersection where
-  show (Intersection t _) = show t
+  show (Intersection t _ _ _) = show t
 
 sortIntersections :: [Intersection] -> [Intersection]
 sortIntersections = sort
 
 -- This assumes your list of intersections is already sorted.
 hit :: [Intersection] -> Maybe Intersection
-hit (x@(Intersection t _):xs) = if t >= 0.0 then Just x else hit xs
-hit []                        = Nothing
+hit (x@(Intersection t _ _ _):xs) = if t >= 0.0 then Just x else hit xs
+hit []                            = Nothing
 
 scene = Scene (sphere unitSphere) (pnt 0 0 (-5)) 100 7 10
 
@@ -79,8 +94,8 @@ traceScene s@(Scene (Shape getInts) _ _ _ _ ) (x, y) = getColour $ hit xs
           xs = getInts r
 
 getColour :: Maybe Intersection -> Colour
-getColour (Just (Intersection _ _)) = colour 1.0 0 0
-getColour Nothing                   = colour 0 0 0
+getColour (Just (Intersection _ _ _ _)) = colour 1.0 0 0
+getColour Nothing                       = colour 0 0 0
 
 ------------------------------------------------------------------------------------
 data Sphere = Sphere Int (M44 Double)
@@ -92,8 +107,9 @@ sphere :: Sphere -> Shape
 sphere s = Shape (getIntersections s)
 
 getIntersections :: Sphere -> Ray -> [Intersection]
-getIntersections s r = sortIntersections [Intersection t (pnt 0 0 0) | t <- intersects s r]
+getIntersections s r = sortIntersections [Intersection t r (pnt 0 0 0) m | t <- intersects s r]
     where shp = sphere s
+          m = Material (colour 0 0 1) 0 0 0 0
 
 intersects :: Sphere -> Ray -> [Double]
 intersects s@(Sphere _ m) r =

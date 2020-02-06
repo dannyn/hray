@@ -6,28 +6,33 @@ import           Test.QuickCheck
 import           Math
 import           Ray
 import           Scene
+import           Colour
 
 main :: IO ()
 main = hspec spec
 
 s = sphere unitSphere
 
+imat = Material (colour 0 0 1) 0 0 0 0 
+iray = Ray (pnt 0 0 0) (vec 0 0 1)
+inorm = vec 1 0 0 
+
 spec :: Spec
 spec = do
   describe "hit" $ do
     it "hit, all positive" $ do
-        let i1 = Intersection 1 (vec 0 0 0)
-        let i2 = Intersection 2 (vec 0 0 0)
+        let i1 = Intersection 1 iray inorm imat
+        let i2 = Intersection 2 iray inorm imat
         let xs = sortIntersections [i1, i2]
         hit xs `shouldBe` Just i1
     it "hit, some negative" $ do
-        let i1 = Intersection (-1) (vec 0 0 0)
-        let i2 = Intersection 2 (vec 0 0 0)
+        let i1 = Intersection (-1) iray inorm imat
+        let i2 = Intersection 2 iray inorm imat
         let xs = sortIntersections [i1, i2]
         hit xs `shouldBe` Just i2
     it "hit, all negative" $ do
-        let i1 = Intersection (-2) (vec 0 0 0)
-        let i2 = Intersection (-1) (vec 0 0 0)
+        let i1 = Intersection (-2) iray inorm imat
+        let i2 = Intersection (-1) iray inorm imat
         let xs = sortIntersections [i1, i2]
         hit xs `shouldBe` Nothing
   describe "sphere" $ do
