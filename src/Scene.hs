@@ -35,17 +35,9 @@ data Scene = Scene { shape         :: Shape
                    , wall_size     :: Int
                    , wall_z        :: Double }
 
--- an intersection shouldnt return the shape, it should return anything we need to know about the
--- intersection to perform the next steps
--- 
---  We want 
---      the ray
---      the normal
---      time
---      material
 data Intersection = Intersection { time :: Double
                                  , ray :: Ray
-                                 , normal :: V4 Double -- this should be a function to get a normal at a point
+                                 , normal :: V4 Double -> V4 Double
                                  , mat :: Material } 
 
 instance Eq Intersection where
@@ -98,17 +90,19 @@ getColour (Just (Intersection _ _ _ _)) = colour 1.0 0 0
 getColour Nothing                       = colour 0 0 0
 
 ------------------------------------------------------------------------------------
-data Sphere = Sphere Int (M44 Double)
+data Sphere = Sphere Material (M44 Double)
 
 unitSphere :: Sphere
-unitSphere = Sphere 1 (identity :: M44 Double)
+unitSphere = Sphere defMat (identity :: M44 Double)
+    where defMat = Material (colour 1 1 1) 0.1 0.9 0.9 200.0
 
 sphere :: Sphere -> Shape
 sphere s = Shape (getIntersections s)
 
 getIntersections :: Sphere -> Ray -> [Intersection]
-getIntersections s r = sortIntersections [Intersection t r (pnt 0 0 0) m | t <- intersects s r]
+getIntersections s r = sortIntersections [Intersection t r n m | t <- intersects s r]
     where shp = sphere s
+          n = normal' s 
           m = Material (colour 0 0 1) 0 0 0 0
 
 intersects :: Sphere -> Ray -> [Double]
