@@ -43,3 +43,14 @@ spec = describe "math" $
             let tM = transMat (pnt 10 5 7)
             let m = tM !*! sM !*! rM
             vecCmp (m !* v) (pnt 15 0 7)
+       it "reflect vector at 45" $
+         do let v = vec 1 (-1) 0
+            let n = vec 0 1 0 
+            let r = reflect v n
+            r `shouldBe` vec 1 1 0 
+       it "reflect vector off a slanted surface" $
+         do let r = sqrt 2 / 2
+            let v = vec 0 (-1) 0
+            let n = vec r r 0
+            let r = reflect v n
+            vecCmp r (vec 1 0 0)

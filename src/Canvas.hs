@@ -30,8 +30,8 @@ instance Functor Canvas where
 
 --
 -- We transform a canvas of coordinates to a canvas of colours
--- f :: Sphere -> Canvas (Int, Int) -> Canvas Colour 
--- f is expected to be curried in order to pass it information about the world such 
+-- f :: Sphere -> Canvas (Int, Int) -> Canvas Colour
+-- f is expected to be curried in order to pass it information about the world such
 -- as lights and models.
 --
 
@@ -64,9 +64,9 @@ canvasToString (Canvas p _ _) = getWrappedLines s
     where f acc x = acc ++ x
           s = concat (V.map colourToRGB p)
 
-canvasSaveToDisk:: Canvas Colour -> IO ()
-canvasSaveToDisk c = do
-    writeFile "test.ppm" $ canvasHeader c ++ canvasToString c
+canvasSaveToDisk:: String -> Canvas Colour -> IO ()
+canvasSaveToDisk fn c = do
+    writeFile fn $ canvasHeader c ++ canvasToString c
     return ()
 
 getWrappedLines :: [String] -> String

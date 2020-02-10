@@ -35,6 +35,7 @@ executable hray
                      , lens
                      , hray
                      , linear
+                     , optparse-applicative
   default-language:    Haskell2010
 
 test-suite hray-test

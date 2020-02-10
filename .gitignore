@@ -1,4 +1,4 @@
 .stack-work
 .*.swp
 .ghc*
-test.ppm
+*.ppm

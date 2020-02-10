@@ -4,7 +4,10 @@ module Math
 , vec
 , pnt
 , vecCmp
+, dblCmp
 , idVec
+, zeroW
+, reflect
 , transMat
 , rotMat
 , scaleMat
@@ -24,8 +27,18 @@ pnt x y z = V4 x y z 1.0
 vecCmp :: V4 Double -> V4 Double -> Bool
 vecCmp u v= nearZero (u - v)
 
+dblCmp :: Double -> Double -> Bool
+dblCmp x y = nearZero (x - y)
+
 idVec :: V4 Double
 idVec = vec 0 0 0
+
+zeroW :: V4 Double -> V4 Double
+zeroW (V4 x y z _) = V4 x y z 0.0
+
+reflect :: V4 Double -> V4 Double -> V4 Double
+reflect v n = v - n ^* (2 * d)
+    where d = dot v n
 
 -- Always pass a pnt
 transMat :: V4 Double -> M44 Double
