@@ -2,9 +2,10 @@ module Scene
 (
   Scene(..)
 , Material(..)
-, scene
+, Light(..)
 , intersects
 , traceScene
+, lighting
 , Sphere(..)
 , unitSphere
 , Intersection(..)
@@ -23,11 +24,11 @@ import           Ray
 
 data Shape = Shape { getInts :: Ray -> [Intersection] }
 
-data Material = Material { c :: Colour
-                         , ambient :: Double
-                         , diffuse :: Double
-                         , specular :: Double
-                         , shininess ::Double }
+data Material = Material { c' :: Colour
+                         , ambient' :: Double
+                         , diffuse' :: Double
+                         , specular' :: Double
+                         , shininess' ::Double }
 
 data Scene = Scene { shape         :: Shape
                    , ray_origin    :: V4 Double
@@ -57,7 +58,6 @@ hit :: [Intersection] -> Maybe Intersection
 hit (x@(Intersection t _ _ _):xs) = if t >= 0.0 then Just x else hit xs
 hit []                            = Nothing
 
-scene = Scene (sphere unitSphere) (pnt 0 0 (-5)) 100 7 10
 
 pixelSize :: Scene -> Double
 pixelSize (Scene _ _ cp ws _) = fromIntegral ws / fromIntegral cp
@@ -86,8 +86,50 @@ traceScene s@(Scene (Shape getInts) _ _ _ _ ) (x, y) = getColour $ hit xs
           xs = getInts r
 
 getColour :: Maybe Intersection -> Colour
-getColour (Just (Intersection _ _ _ _)) = colour 1.0 0 0
+getColour (Just (Intersection t r@(Ray _ rd)  n m)) = lighting m l p rd (n p)
+    where p = pos r t
+          l = Light (pnt (-10) 10 (-10)) (colour 1 1 1)
 getColour Nothing                       = colour 0 0 0
+
+data Light = Light { p :: V4 Double 
+                   , i :: Colour }
+
+--- the dot function seems to lack accuracy 
+-- material light position eye normal
+lighting :: Material -> Light -> V4 Double -> V4 Double -> V4 Double -> Colour
+lighting m@(Material mc ma md ms msh) l@(Light lp li) p e n = a + d + s
+    where ecolour = mc * li   -- i am iffy about this
+          lightv = normalize (lp - p)
+          a = ambient m l
+          light_dot_normal = dot lightv n
+          d = diffuse light_dot_normal ecolour md
+          reflectv = reflect (-lightv) n
+          reflect_dot_eye = dot reflectv e
+          s = specular light_dot_normal reflect_dot_eye li ms msh
+
+effectiveColour :: Material -> Light -> Colour
+effectiveColour (Material mc _ _ _ _) (Light _ li) = mc * li
+
+ambient :: Material -> Light -> Colour
+ambient m@(Material _ ma _ _ _) l = (effectiveColour m l) ^* ma
+
+-- light_dot_normal effective_colour diffuse
+diffuse :: Double -> Colour -> Double -> Colour
+diffuse ldn ec md
+    | ldn < 0 = colour 0 0 0
+    | otherwise = ec ^* (md * ldn)
+
+-- light_dot_normal reflect_dot_eye li specular shininess
+specular :: Double -> Double -> Colour -> Double -> Double -> Colour
+specular ldn rde li ms msh
+    | ldn < 0 = colour 0 0 0
+    | otherwise = specular'' rde li ms msh
+
+specular'' :: Double -> Colour -> Double -> Double -> Colour
+specular'' rde li ms msh
+    | rde <= 0 = colour 0 0 0
+    | otherwise = li ^* (ms * factor)
+    where factor = rde ** msh
 
 ------------------------------------------------------------------------------------
 data Sphere = Sphere Material (M44 Double)
@@ -100,10 +142,9 @@ sphere :: Sphere -> Shape
 sphere s = Shape (getIntersections s)
 
 getIntersections :: Sphere -> Ray -> [Intersection]
-getIntersections s r = sortIntersections [Intersection t r n m | t <- intersects s r]
+getIntersections s@(Sphere m _) r = sortIntersections [Intersection t r n m | t <- intersects s r]
     where shp = sphere s
           n = normal' s 
-          m = Material (colour 0 0 1) 0 0 0 0
 
 intersects :: Sphere -> Ray -> [Double]
 intersects s@(Sphere _ m) r =
