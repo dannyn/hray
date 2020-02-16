@@ -8,6 +8,7 @@ import           Colour
 import           Linear
 import           Scene
 import           Math
+import           Sphere
 
 data Configuration = Configuration
     { filename :: String }
