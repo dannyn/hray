@@ -19,7 +19,7 @@ data Sphere = Sphere Material (M44 Double)
 
 unitSphere :: Sphere
 unitSphere = Sphere defMat (identity :: M44 Double)
-    where defMat = Material (colour 1 1 1) 0.1 0.9 0.9 200.0
+    where defMat = Material (colour 1 0 1) 0.1 0.9 0.9 200.0
 
 sphere :: Sphere -> Shape
 sphere s = Shape (getIntersections s)

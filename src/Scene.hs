@@ -1,12 +1,15 @@
 module Scene
 (
-  Scene(..)
-, Shape(..)
+  Shape(..)
 , Material(..)
+, Scene(..)
+, Intersection(..)
 , Light(..)
+, IntComps(..)
+, prepareComps
 , traceScene
 , lighting
-, Intersection(..)
+, intersectShapes
 , hit
 , sortIntersections
 ) where
@@ -26,7 +29,7 @@ data Material = Material { c' :: Colour
                          , specular' :: Double
                          , shininess' ::Double }
 
-data Scene = Scene { shape         :: Shape
+data Scene = Scene { shape         :: [Shape]
                    , ray_origin    :: V4 Double
                    , canvas_pixels :: Int
                    , wall_size     :: Int
@@ -37,6 +40,15 @@ data Intersection = Intersection { time :: Double
                                  , normal :: V4 Double -> V4 Double
                                  , mat :: Material } 
 
+data IntComps = IntComps { icTime :: Double
+                         , icPos :: V4 Double
+                         , icEye :: V4 Double
+                         , icNormal :: V4 Double
+                         , icInside :: Bool } deriving (Show)
+
+data Light = Light { p :: V4 Double 
+                   , i :: Colour }
+
 instance Eq Intersection where
     (==) (Intersection t1 _ _ _) (Intersection t2 _ _ _) = dblCmp t1 t2
 
@@ -46,14 +58,29 @@ instance Ord Intersection where
 instance Show Intersection where
   show (Intersection t _ _ _) = show t
 
+instance Eq IntComps where
+    (==) (IntComps t1 p1 e1 n1 i1) (IntComps t2 p2 e2 n2 i2) = t && p && e && n && i
+        where t = nearZero (t1 - t2)
+              p = vecCmp p1 p2
+              e = vecCmp e1 e2
+              n = vecCmp n1 n2
+              i = i1 == i2
+
 sortIntersections :: [Intersection] -> [Intersection]
 sortIntersections = sort
+
+intersectShapes :: [Shape] -> Ray -> [Intersection]
+intersectShapes shapes r = sort $ getInts r =<< shapes
+    where getInts = \r (Shape gi) -> gi r 
 
 -- This assumes your list of intersections is already sorted.
 hit :: [Intersection] -> Maybe Intersection
 hit (x@(Intersection t _ _ _):xs) = if t >= 0.0 then Just x else hit xs
 hit []                            = Nothing
 
+prepareComps :: Intersection -> IntComps
+prepareComps (Intersection t r@(Ray _ d) n m) = IntComps t p (-d) (n p) False
+    where p = pos r t
 
 pixelSize :: Scene -> Double
 pixelSize (Scene _ _ cp ws _) = fromIntegral ws / fromIntegral cp
@@ -76,25 +103,21 @@ getRay s@(Scene _ ro _ _ wz) (x, y)= Ray ro (normalize $ pos - ro)
     where pos = pnt (worldX s x) (worldY s y) wz
 
 traceScene:: Scene -> (Int, Int) -> Colour
-traceScene s@(Scene (Shape getInts) _ _ _ _ ) (x, y) = getColour $ hit xs
+traceScene s@(Scene shape _ _ _ _ ) (x, y) = getColour $ hit xs
     where ray_origin = pnt 0 0 (-5)
           r = getRay s (x,y)
-          xs = getInts r
+          xs = intersectShapes shape r
 
 getColour :: Maybe Intersection -> Colour
-getColour (Just (Intersection t r@(Ray _ rd)  n m)) = lighting m l p rd (n p)
+getColour (Just (Intersection t r@(Ray _ rd)  n m)) = lighting m l p (-rd) (n p)
     where p = pos r t
           l = Light (pnt (-10) 10 (-10)) (colour 1 1 1)
 getColour Nothing                       = colour 0 0 0
 
-data Light = Light { p :: V4 Double 
-                   , i :: Colour }
-
---- the dot function seems to lack accuracy 
 -- material light position eye normal
 lighting :: Material -> Light -> V4 Double -> V4 Double -> V4 Double -> Colour
 lighting m@(Material mc ma md ms msh) l@(Light lp li) p e n = a + d + s
-    where ecolour = mc * li   -- i am iffy about this
+    where ecolour = mc * li
           lightv = normalize (lp - p)
           a = ambient m l
           light_dot_normal = dot lightv n

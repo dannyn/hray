@@ -17,4 +17,9 @@ hadamard (V3 r1 g1 b1) (V3 r2 g2 b2) = V3 (r1*r2) (g1*g2) (b1*b2)
 
 colourToRGB :: Colour -> [String]
 colourToRGB (V3 r g b) = [rgb r, rgb g, rgb b]
-    where rgb d = show . floor $ d * 255
+    where rgb d = show . floor $ (clamp d) * 255
+
+clamp :: Double -> Double
+clamp r 
+    | r > 1.0 = 1.0
+    | otherwise = r 

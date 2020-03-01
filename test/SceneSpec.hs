@@ -7,6 +7,7 @@ import           Math
 import           Ray
 import           Scene
 import           Colour
+import           Sphere
 
 import           Linear
 
@@ -19,6 +20,15 @@ inorm = \x -> vec 1 0 0
 
 imaterial = Material (colour 1 1 1) 0.1 0.9 0.9 200.0
 originPnt = pnt 0 0 0
+
+ispheres = map sphere [ Sphere m1 (identity :: M44 Double)
+                      , Sphere m2 s]
+    where m1 = Material (colour 0.8 1.0 0.6) 0.1 0.7 0.2 200.0
+          m2 = Material (colour 1 1 1) 0.1 0.9 0.9 200.0
+          s = scaleMat $ pnt 0.5 0.5 0.5
+
+tIntersection t = Intersection t iray n imaterial
+    where n = normal' unitSphere
 
 spec :: Spec
 spec = do
@@ -78,3 +88,15 @@ spec = do
         let c = lighting imaterial light originPnt eyev normalv 
         let result = colour 0.1 0.1 0.1
         nearZero (c - result) `shouldBe` True 
+  describe "scene" $ do
+    it "two spheres" $ do
+        let r = Ray (pnt 0 0 (-5)) (vec 0 0 1)
+        let i = map tIntersection [4, 4.5, 5.5, 6]
+        intersectShapes ispheres r `shouldBe` i
+    it "prepare computations" $ do
+        let r = Ray (pnt 0 0 (-5)) (vec 0 0 1)
+        let n = normal' unitSphere
+        let i = Intersection 4 r n imaterial
+        let c = IntComps 4 (pnt 0 0 (-1)) (vec 0 0 (-1)) (vec 0 0 (-1)) False
+        (prepareComps i) `shouldBe` c
+
