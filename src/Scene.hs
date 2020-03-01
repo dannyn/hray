@@ -79,8 +79,12 @@ hit (x@(Intersection t _ _ _):xs) = if t >= 0.0 then Just x else hit xs
 hit []                            = Nothing
 
 prepareComps :: Intersection -> IntComps
-prepareComps (Intersection t r@(Ray _ d) n m) = IntComps t p (-d) (n p) False
+prepareComps (Intersection t r@(Ray _ d) n m) = IntComps t p (-d) normal' inside
     where p = pos r t
+          normal = n p
+          dotN = dot normal (-d)
+          inside = if dotN < 0 then True else False
+          normal' = if dotN < 0 then -normal else normal
 
 pixelSize :: Scene -> Double
 pixelSize (Scene _ _ cp ws _) = fromIntegral ws / fromIntegral cp
