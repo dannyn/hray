@@ -5,10 +5,9 @@ module Canvas
 , canvasHeader
 , coordCanvas
 , canvas
-, getPixel
-, setPixel
 , canvasToString
 , canvasSaveToDisk
+, fromList
 , wrapTo70
 , addSpaces
 , getWrappedLines
@@ -17,18 +16,15 @@ module Canvas
 import           System.IO
 import           Text.Printf
 
-import qualified Data.Vector as V
-
 import           Colour
 
-data Canvas a = Canvas  { pixels :: V.Vector a
+data Canvas a = Canvas  { pixels :: [a]
                         , width  :: Int
                         , height :: Int } deriving (Show, Eq)
 
 instance Functor Canvas where
     fmap f (Canvas p w h) = Canvas (fmap f p) w h
 
---
 -- We transform a canvas of coordinates to a canvas of colours
 -- f :: Sphere -> Canvas (Int, Int) -> Canvas Colour
 -- f is expected to be curried in order to pass it information about the world such
@@ -45,24 +41,20 @@ canvasHeader :: Canvas a -> String
 canvasHeader (Canvas _ w h) = printf "P3\n%d %d\n255\n" w h
 
 coordCanvas :: Int -> Int -> Canvas (Int, Int)
-coordCanvas w h = Canvas (V.fromList [(x,y) | x <- [0..w-1], y <- [0..h-1]]) w h
+coordCanvas w h = Canvas [(x,y) | x <- [0..w-1], y <- [0..h-1]] w h
 
 canvas :: Int -> Int -> Canvas Colour
 canvas w h = Canvas pixels w h
     where black  = colour 0.0 0.0 0.0
-          pixels = V.fromList [black | n <- [1..w*h]]
+          pixels = [black | n <- [1..w*h]]
 
-getPixel :: Int -> Int -> Canvas Colour -> Colour
-getPixel x y (Canvas p w h) =  p V.! ( (y * w) + x)
-
-setPixel :: Int -> Int -> Canvas Colour -> Colour -> Canvas Colour
-setPixel x y (Canvas p w h) c = Canvas ( p V.//  [(i,c)] )  w h
-    where i = (y * w) + x
+fromList :: Int -> Int -> [a] -> Canvas a
+fromList w h xs = Canvas xs w h
 
 canvasToString :: Canvas Colour -> String
 canvasToString (Canvas p _ _) = getWrappedLines s
     where f acc x = acc ++ x
-          s = concat (V.map colourToRGB p)
+          s = concat (map colourToRGB p)
 
 canvasSaveToDisk:: String -> Canvas Colour -> IO ()
 canvasSaveToDisk fn c = do

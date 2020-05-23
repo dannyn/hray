@@ -21,7 +21,8 @@ parseArgs = Configuration
        <> showDefault
        <> value "test.ppm" )
 
-scene = Scene ([sphere unitSphere]) (pnt 0 0 (-5)) 1000 7 10
+l = Light (pnt (-10) 10 (-10)) (colour 1 1 1)
+scene = Scene ([sphere unitSphere]) l (pnt 0 0 (-5)) 1000 7 10
 
 run :: Configuration -> IO ()
 run (Configuration fn) = canvasSaveToDisk fn canvas

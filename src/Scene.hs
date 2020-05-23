@@ -30,6 +30,7 @@ data Material = Material { c' :: Colour
                          , shininess' ::Double }
 
 data Scene = Scene { shape         :: [Shape]
+                   , light         :: Light
                    , ray_origin    :: V4 Double
                    , canvas_pixels :: Int
                    , wall_size     :: Int
@@ -87,10 +88,10 @@ prepareComps (Intersection t r@(Ray _ d) n m) = IntComps t p (-d) normal' inside
           normal' = if dotN < 0 then -normal else normal
 
 pixelSize :: Scene -> Double
-pixelSize (Scene _ _ cp ws _) = fromIntegral ws / fromIntegral cp
+pixelSize (Scene _ _ _ cp ws _) = fromIntegral ws / fromIntegral cp
 
 half :: Scene -> Double
-half (Scene _ _ _ ws _) = fromIntegral ws / 2
+half (Scene _ _ _ _ ws _) = fromIntegral ws / 2
 
 worldX :: Scene -> Int -> Double
 worldX s x = h + px
@@ -103,20 +104,19 @@ worldY s y =  h - py
           py = pixelSize s * fromIntegral y
 
 getRay :: Scene -> (Int, Int) -> Ray
-getRay s@(Scene _ ro _ _ wz) (x, y)= Ray ro (normalize $ pos - ro)
+getRay s@(Scene _ _ ro _ _ wz) (x, y)= Ray ro (normalize $ pos - ro)
     where pos = pnt (worldX s x) (worldY s y) wz
 
 traceScene:: Scene -> (Int, Int) -> Colour
-traceScene s@(Scene shape _ _ _ _ ) (x, y) = getColour $ hit xs
+traceScene s@(Scene shape light _ _ _ _) (x, y) = getColour s $ hit xs
     where ray_origin = pnt 0 0 (-5)
           r = getRay s (x,y)
           xs = intersectShapes shape r
 
-getColour :: Maybe Intersection -> Colour
-getColour (Just (Intersection t r@(Ray _ rd)  n m)) = lighting m l p (-rd) (n p)
+getColour :: Scene -> Maybe Intersection -> Colour
+getColour (Scene _ light _ _ _ _ ) (Just (Intersection t r@(Ray _ rd)  n m)) = lighting m light p (-rd) (n p)
     where p = pos r t
-          l = Light (pnt (-10) 10 (-10)) (colour 1 1 1)
-getColour Nothing                       = colour 0 0 0
+getColour _ Nothing                       = colour 0 0 0
 
 -- material light position eye normal
 lighting :: Material -> Light -> V4 Double -> V4 Double -> V4 Double -> Colour

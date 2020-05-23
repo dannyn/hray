@@ -30,6 +30,9 @@ ispheres = map sphere [ Sphere m1 (identity :: M44 Double)
 tIntersection t = Intersection t iray n imaterial
     where n = normal' unitSphere
 
+iscene = Scene ispheres l (pnt 0 0 (-5)) 1000 7 10
+    where l = Light (pnt (-10) 10 (-10)) (colour 1 1 1)
+
 spec :: Spec
 spec = do
   describe "hit" $ do
@@ -113,3 +116,8 @@ spec = do
         let c = prepareComps i
         let expectedc = IntComps 1 (pnt 0 0 1) (vec 0 0 (-1)) (vec 0 0 (-1)) True
         c `shouldBe` expectedc
+    --it "shading intersection" $ do
+    --    let r = Ray (pnt 0 0 0) (vec 0 0 1)
+    --    let n = normal' unitSphere
+    --    let i = Intersection 4 r n imaterial
+    --    let c = prepareComps i
