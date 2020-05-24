@@ -11,10 +11,12 @@ module Canvas
 , wrapTo70
 , addSpaces
 , getWrappedLines
+, pmap
 ) where
 
 import           System.IO
 import           Text.Printf
+import           Control.Parallel.Strategies
 
 import           Colour
 
@@ -23,7 +25,11 @@ data Canvas a = Canvas  { pixels :: [a]
                         , height :: Int } deriving (Show, Eq)
 
 instance Functor Canvas where
-    fmap f (Canvas p w h) = Canvas (fmap f p) w h
+    fmap f (Canvas p w h) = Canvas c w h
+        where c = fmap f p
+
+pmap f (Canvas p w h) = Canvas c w h 
+    where c = fmap f p `using` parListChunk 5000 rseq
 
 -- We transform a canvas of coordinates to a canvas of colours
 -- f :: Sphere -> Canvas (Int, Int) -> Canvas Colour

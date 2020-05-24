@@ -22,11 +22,11 @@ parseArgs = Configuration
        <> value "test.ppm" )
 
 l = Light (pnt (-10) 10 (-10)) (colour 1 1 1)
-scene = Scene ([sphere unitSphere]) l (pnt 0 0 (-5)) 1000 7 10
+scene = Scene ([sphere unitSphere]) l (pnt 0 0 (-5)) 5000 7 10
 
 run :: Configuration -> IO ()
 run (Configuration fn) = canvasSaveToDisk fn canvas
-    where canvas = fmap (traceScene scene) (coordCanvas 1000 1000)
+    where canvas = pmap (traceScene scene) (coordCanvas 5000 5000)
 
 main :: IO ()
 main = run =<< execParser opts
