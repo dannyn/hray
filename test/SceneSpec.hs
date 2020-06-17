@@ -100,24 +100,25 @@ spec = do
         let r = Ray (pnt 0 0 (-5)) (vec 0 0 1)
         let n = normal' unitSphere
         let i = Intersection 4 r n imaterial
-        let c = IntComps 4 (pnt 0 0 (-1)) (vec 0 0 (-1)) (vec 0 0 (-1)) False
+        let c = IntComps 4 (pnt 0 0 (-1)) (vec 0 0 (-1)) (vec 0 0 (-1)) imaterial False
         (prepareComps i) `shouldBe` c
     it "intersection outside" $ do
         let r = Ray (pnt 0 0 (-5)) (vec 0 0 1)
         let n = normal' unitSphere
         let i = Intersection 4 r n imaterial
         let c = prepareComps i
-        let isInside = \(IntComps _ _ _ _ inside) -> inside
+        let isInside = \(IntComps _ _ _ _ _ inside) -> inside
         isInside c `shouldBe` False
     it "intersection inside" $ do
         let r = Ray (pnt 0 0 0) (vec 0 0 1)
         let n = normal' unitSphere
         let i = Intersection 1 r n imaterial
         let c = prepareComps i
-        let expectedc = IntComps 1 (pnt 0 0 1) (vec 0 0 (-1)) (vec 0 0 (-1)) True
+        let expectedc = IntComps 1 (pnt 0 0 1) (vec 0 0 (-1)) (vec 0 0 (-1)) imaterial True
         c `shouldBe` expectedc
     --it "shading intersection" $ do
     --    let r = Ray (pnt 0 0 0) (vec 0 0 1)
     --    let n = normal' unitSphere
     --    let i = Intersection 4 r n imaterial
     --    let c = prepareComps i
+    --    let s = shadeHit iscene comps

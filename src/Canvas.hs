@@ -29,7 +29,7 @@ instance Functor Canvas where
         where c = fmap f p
 
 pmap f (Canvas p w h) = Canvas c w h 
-    where c = fmap f p `using` parListChunk 5000 rseq
+    where c = fmap f p `using` parListChunk (10000) rseq
 
 -- We transform a canvas of coordinates to a canvas of colours
 -- f :: Sphere -> Canvas (Int, Int) -> Canvas Colour

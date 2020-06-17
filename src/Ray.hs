@@ -11,8 +11,8 @@ import           Colour
 import           Linear
 import           Math
 
-data Ray = Ray { origin    :: V4 Double
-               , direction :: V4 Double } deriving (Show)
+data Ray = Ray { rayOrigin :: V4 Double
+               , rayDir :: V4 Double } deriving (Show)
 
 instance Eq Ray where
     (==) (Ray o1 d1) (Ray o2 d2) = vecCmp o1 o2 && vecCmp d1 d2

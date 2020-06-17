@@ -2,3 +2,4 @@
 .*.swp
 .ghc*
 *.ppm
+hray.eventlog

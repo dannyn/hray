@@ -23,32 +23,33 @@ import           Ray
 
 data Shape = Shape { getInts :: Ray -> [Intersection] }
 
-data Material = Material { c' :: Colour
+data Material = Material { matC :: Colour
                          , ambient' :: Double
                          , diffuse' :: Double
                          , specular' :: Double
-                         , shininess' ::Double }
+                         , shininess' ::Double } deriving (Show)
 
 data Scene = Scene { shape         :: [Shape]
                    , light         :: Light
-                   , ray_origin    :: V4 Double
-                   , canvas_pixels :: Int
-                   , wall_size     :: Int
-                   , wall_z        :: Double }
+                   , rayOrigin    :: V4 Double
+                   , canvasPixels :: Int
+                   , wallSize     :: Int
+                   , wallZ        :: Double }
 
-data Intersection = Intersection { time :: Double
-                                 , ray :: Ray
-                                 , normal :: V4 Double -> V4 Double
-                                 , mat :: Material } 
+data Intersection = Intersection { intTime :: Double
+                                 , intRay :: Ray
+                                 , intNormal :: V4 Double -> V4 Double
+                                 , intMat :: Material } 
 
 data IntComps = IntComps { icTime :: Double
                          , icPos :: V4 Double
                          , icEye :: V4 Double
                          , icNormal :: V4 Double
+                         , icMat :: Material
                          , icInside :: Bool } deriving (Show)
 
-data Light = Light { p :: V4 Double 
-                   , i :: Colour }
+data Light = Light { lightPos :: V4 Double 
+                   , lightIntensity :: Colour }
 
 instance Eq Intersection where
     (==) (Intersection t1 _ _ _) (Intersection t2 _ _ _) = dblCmp t1 t2
@@ -60,7 +61,7 @@ instance Show Intersection where
   show (Intersection t _ _ _) = show t
 
 instance Eq IntComps where
-    (==) (IntComps t1 p1 e1 n1 i1) (IntComps t2 p2 e2 n2 i2) = t && p && e && n && i
+    (==) (IntComps t1 p1 e1 n1 _ i1) (IntComps t2 p2 e2 n2 _ i2) = t && p && e && n && i
         where t = nearZero (t1 - t2)
               p = vecCmp p1 p2
               e = vecCmp e1 e2
@@ -80,8 +81,10 @@ hit (x@(Intersection t _ _ _):xs) = if t >= 0.0 then Just x else hit xs
 hit []                            = Nothing
 
 prepareComps :: Intersection -> IntComps
-prepareComps (Intersection t r@(Ray _ d) n m) = IntComps t p (-d) normal' inside
-    where p = pos r t
+prepareComps (Intersection t r n m) = IntComps t p (-d) normal' mat inside
+    where d = rayDir r 
+          p = pos r t
+          mat = m
           normal = n p
           dotN = dot normal (-d)
           inside = if dotN < 0 then True else False
@@ -104,7 +107,7 @@ worldY s y =  h - py
           py = pixelSize s * fromIntegral y
 
 getRay :: Scene -> (Int, Int) -> Ray
-getRay s@(Scene _ _ ro _ _ wz) (x, y)= Ray ro (normalize $ pos - ro)
+getRay s@(Scene _ _ ro _ _ wz) (x, y) = Ray ro (normalize $ pos - ro)
     where pos = pnt (worldX s x) (worldY s y) wz
 
 traceScene:: Scene -> (Int, Int) -> Colour
@@ -114,9 +117,13 @@ traceScene s@(Scene shape light _ _ _ _) (x, y) = getColour s $ hit xs
           xs = intersectShapes shape r
 
 getColour :: Scene -> Maybe Intersection -> Colour
-getColour (Scene _ light _ _ _ _ ) (Just (Intersection t r@(Ray _ rd)  n m)) = lighting m light p (-rd) (n p)
-    where p = pos r t
+getColour (Scene _ light _ _ _ _ ) (Just (Intersection t r n m)) = lighting m light p (-rd) (n p)
+    where rd = rayDir r
+          p = pos r t
 getColour _ Nothing                       = colour 0 0 0
+
+--shadeHit :: Scene -> IntComps -> Colour
+--shadeHit (Scene _ light r _ _ _) (IntComps _ pos eye norm) = lighting mat light pos eye norm
 
 -- material light position eye normal
 lighting :: Material -> Light -> V4 Double -> V4 Double -> V4 Double -> Colour
